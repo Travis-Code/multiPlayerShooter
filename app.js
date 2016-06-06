@@ -11,6 +11,8 @@ serv.listen(3000);
 
 var SOCKET_LIST = {};
 var PLAYER_LIST = {};
+var Player_Names = {};
+var numberOfUsers =0;
 
 var Player = function(id){
 	var self = {
@@ -24,14 +26,13 @@ var Player = function(id){
 		pressingUp:false,
 		pressingDown:false,
 		maxSpd:10,
+		username:"",
 	}
+
 
 	self.updatePosition = function(){
 		if(self.pressingRight){
 			self.x += self.maxSpd;
-		}
-		else if(self.pressingDown){
-			self.x -+ self.maxSpd;
 		}
 		if(self.pressingLeft)
 			self.x -= self.maxSpd;
@@ -44,7 +45,8 @@ var Player = function(id){
 }
 
 var io = require("socket.io")(serv,{});
-io.sockets.on('connection', function(socket){                                           
+io.sockets.on('connection', function(socket){         
+	var addedUser = false;                                  
 	socket.id = Math.random();
 	SOCKET_LIST[socket.id] = socket;
 	console.log(" User Number " + socket.id + " has CONNECTED" );
@@ -59,12 +61,32 @@ io.sockets.on('connection', function(socket){
 
 	});
 
+	socket.on('signIn', function(username){
+		if(addedUser) return;
+		player.username = username;
+		console.log(player.username);
+		++numberOfUsers;
+		addedUser = true;
+
+		Player_Names[player.username] = username;
+		console.log(" User " + player.username + " has signed in" );
+		socket.emit('signInResponse', {success:true});
+	});
+
 	//chat
 	socket.on("sendMsgToServer", function(data){
-		var playerName = ("" + socket.id).slice(2,7);
-		console.log(playerName + " " + data);
+		// var playerName = (""+ player.username  + socket.id);
+		var playerName = (""+ player.username);
 		for(var i in SOCKET_LIST){
+			// SOCKET_LIST[i].emit('addToChat', playerName + ': ' + data);
 			SOCKET_LIST[i].emit('addToChat', playerName + ': ' + data);
+
+		}
+	});
+
+	socket.on('collidedWall',function(data){
+		if(data.inputId === 'boom' && player.pressingRight ===true){
+			player.pressingRight = false;
 		}
 	});
 

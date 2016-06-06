@@ -1,12 +1,6 @@
-<!-- <div id="signDiv">
-	Username: <input id="signDiv-username" type="text"></input>
-	<button id="signDiv-signIn">Sign In</button><br>
-	Password: <input id="signDiv-password" type ="password"></input>
-	<button id="signDiv-signUp">Sign Up</button>
-</div> -->
 
-<!-- <div id="gameDiv" style="display: none;">
- -->
+
+
 
 <!DOCTYPE html>
 <html>
@@ -15,11 +9,16 @@
 	<link rel="stylesheet" type="text/css" href="/client/style.css">
 </head>
 	<body>
+		
 		<div id="gameDiv">
-			<h1>DEV INVADERS</h1>
-			<div id ="canvasContainer">
+ 			<h1>STARSHIP TROOPERS</h1>
+ 			<div id ="canvasContainer">
 				<canvas id="ctx" width="640" height="380"></canvas>
 			</div>
+			<div id="signDiv">
+			Chat Name: <input id="signDiv-username" type="text"></input>
+			<button id="signDiv-signIn">SUBMIT</button><br>
+		</div>
 			<div id="chat-text"></div>
 			<form id="chat-form">
 				<input id="chat-input" "type=text" name="etext" placeholder="chat text"></input>
@@ -34,24 +33,7 @@
 	window.addEventListener("load", gamePlay, false);
 
 	var socket = io();
-	//sign in
-	// var signDiv = document.getElementById('signDiv');
-	// var signDivUsername = document.getElementById('signDiv-username');
-	// var signDivSignIn = document.getElementById('signDiv-signIn');
-	// var signDivSignUp = document.getElementById('signDiv-signUp');
-	// var signDivPassword = document.getElementById('signDiv-password');
-
-	// signDivSignIn.onclick = function(){
-	// 	socket.emit('signIn', {username:signDivUsername.value, password:signDivPassword.value})
-	// }
-	// socket.on('signInResponse', function(data){
-	// 	if(data.success){
-	// 		signDiv.style.display = 'none';
-	// 		gameDiv.style.display = 'inline-block';
-	// 	} else {
-	// 		alert("Sign in Unsuccessful.");
-	// 	}
-	// });
+	
 
 	//TEST CODE------------------------
 
@@ -65,6 +47,7 @@
 	var chatText = document.getElementById('chat-text');
 	var chatInput = document.getElementById('chat-input');
 	var chatForm = document.getElementById('chat-form');
+	var username;
 	var ctx = document.getElementById("ctx").getContext("2d");
 	var canvasWidth = ctx.canvas.width;
 	var canvasHeight = ctx.canvas.height;
@@ -87,6 +70,27 @@
 			player(data);
 		});
 	}
+
+
+
+	//sign in-------------------------------------------
+	var signDiv = document.getElementById('signDiv');
+	var signDivUsername = document.getElementById('signDiv-username');
+	var signDivSignIn = document.getElementById('signDiv-signIn');
+
+	signDivSignIn.onclick = function(){
+		socket.emit('signIn', signDivUsername.value)
+	}
+
+	socket.on('signInResponse', function(data){
+		if(data.success){
+			signDiv.style.display = 'none';
+			gameDiv.style.display = 'block';
+		} else {
+			alert("Sign in Unsuccessful.");
+		}
+	});
+
 
 	//CHAT--------------------------------------------------
 	socket.on('addToChat', function(data){
@@ -131,9 +135,16 @@
 	function player(data){
 		for(var i = 0; i < data.length; i++){
 			ctx.drawImage(playerSprite, data[i].x, data[i].y,50,50);
+			collidedWall(data);
+		}
+	}
+	
+
+	function collidedWall(data){
+		for(var i = 0; i < data.length; i++){
 			if(data[i].x+50 >= canvasWidth){
 				console.log("collision right wall");
-				socket.emit('keyPress',{inputId:'right',state:false});
+				socket.emit('collidedWall',{inputId:'boom',state:true});
 			}
 		}
 	}
