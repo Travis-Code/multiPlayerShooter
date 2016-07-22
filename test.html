@@ -1,0 +1,50 @@
+	var chatText = document.getElementById('chat-text');
+	var chatInput = document.getElementById('chat-input');
+	var chatForm = document.getElementById('chat-form');
+	var ctx = document.getElementById("ctx").getContext("2d");
+	var canvasWidth = ctx.canvas.width;
+	var canvasHeight = ctx.canvas.height;
+ 	var backgroundImgWidth = 0;
+    var backgroundImgHeight =0;
+    var imageData = {};
+    var scrollVal = 0;
+    var speed =2;
+	var playerSprite = new Image();
+	var spaceBackground = new Image();
+
+
+//background test.....
+	function renderBackground(){
+		if(scrollVal >= canvasWidth){
+		    scrollVal = 0;
+		}
+
+		scrollVal+=speed;                   
+		// ctx.drawImage(spaceBackground,canvasWidth-scrollVal,0,scrollVal,backgroundImgHeight, 0, 0, scrollVal,backgroundImgHeight);
+		// ctx.drawImage(spaceBackground,scrollVal,0,backgroundImgWidth, backgroundImgHeight);
+
+		// To go the other way instead
+		ctx.drawImage(spaceBackground,-scrollVal,0,backgroundImgWidth, backgroundImgHeight);
+		ctx.drawImage(spaceBackground,canvasWidth-scrollVal,0,backgroundImgWidth, backgroundImgHeight);
+
+    setTimeout(function(){render();},10);
+		
+	}
+
+	function gamePlay(){
+		ctx.clearRect(0,0,canvasWidth,canvasHeight);
+		renderBackground();
+		socket.on("newPosition", function(data){
+			for(var i = 0; i < data.length; i++){
+				ctx.drawImage(playerSprite, data[i].x, data[i].y,50,50);
+				if(data[i].x+50 >= canvasWidth){
+					console.log("collision right wall");
+					socket.emit('keyPress',{inputId:'right',state:false});
+				}
+			}
+		});
+	}
+
+	//ASSETS------------------------------------------------
+	playerSprite.src = "/client/img/nightraiderfixed.png";
+	spaceBackground.src = "/client/img/spaceBackground.png";

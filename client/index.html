@@ -1,44 +1,43 @@
-
-
-
-
 <!DOCTYPE html>
 <html>
 <head>
 	<title>game dev mmo</title>
 	<link rel="stylesheet" type="text/css" href="/client/style.css">
+	<!-- Latest compiled and minified CSS -->
+	<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous"> -->
+
+	<!-- Latest compiled and minified JavaScript -->
+	<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script> -->
 </head>
 	<body>
-		
-		<div id="gameDiv">
- 			<h1>STARSHIP TROOPERS</h1>
- 			<div id ="canvasContainer">
-				<canvas id="ctx" width="640" height="380"></canvas>
+		<div id="gameDiv" class="container">
+	 			<div id ="canvasContainer"><br>
+					<canvas id="ctx" width="640" height="380"></canvas>
+				</div>
+				<div id="signDiv">
+					<input id="signDiv-username" placeholder="ENTER NICKNAME" type="text"></input><br>
+					<button type="button" id="signDiv-signIn" class="btn btn-lg btn-danger">SUBMIT</button><br>
+				</div>
+				<div id="chat-text"></div>
+				<form id="chat-form">
+					<input id="chat-input" "type=text" name="etext" placeholder="chat text"></input>
+				</form>
 			</div>
-			<div id="signDiv">
-			Chat Name: <input id="signDiv-username" type="text"></input>
-			<button id="signDiv-signIn">SUBMIT</button><br>
-		</div>
-			<div id="chat-text"></div>
-			<form id="chat-form">
-				<input id="chat-input" "type=text" name="etext" placeholder="chat text"></input>
-			</form>
 		</div>
 	</body>
 </html>
+
 
 <script src ="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script>
 
 	window.addEventListener("load", gamePlay, false);
-
 	var socket = io();
 	
-
 	//TEST CODE------------------------
-
-
-
 
 
 	//TEST CODE------------------------
@@ -69,28 +68,43 @@
 			loadBackgroundImg();
 			player(data);
 		});
+	socket.on("nameOver", function(dataName){
+					playerName(dataName);
+				});
+
 	}
 
-
-
-	//sign in-------------------------------------------
+	//CHAT sign in-------------------------------------------
 	var signDiv = document.getElementById('signDiv');
 	var signDivUsername = document.getElementById('signDiv-username');
 	var signDivSignIn = document.getElementById('signDiv-signIn');
+	var chatText = document.getElementById('chat-text');
+	var chatInput = document.getElementById('chat-input');
+	var chatForm = document.getElementById('chat-form');
+
+	document.getElementById("signDiv-username").addEventListener("keyup", function(event) {
+		event.preventDefault();
+	    if (event.keyCode == 13) {
+	        document.getElementById("signDiv-signIn").click();
+	    }
+	});
 
 	signDivSignIn.onclick = function(){
 		socket.emit('signIn', signDivUsername.value)
+		document.getElementById('chat-input').focus;
 	}
 
 	socket.on('signInResponse', function(data){
 		if(data.success){
 			signDiv.style.display = 'none';
 			gameDiv.style.display = 'block';
+			chatText.style.display = 'block';
+			chatInput.style.display = 'block';
+			chatForm.style.display = 'block';
 		} else {
 			alert("Sign in Unsuccessful.");
 		}
 	});
-
 
 	//CHAT--------------------------------------------------
 	socket.on('addToChat', function(data){
@@ -110,48 +124,53 @@
 
 	//CONTROLS------------------------------------------------
 	document.onkeydown = function(event){
-		if(event.keyCode === 68)	//d
+		if(event.keyCode === 68 || event.keyCode === 39)	//d
 			socket.emit('keyPress',{inputId:'right',state:true});
-		else if(event.keyCode === 83)	//s
+		else if(event.keyCode === 83 || event.keyCode === 40 )	//s
 			socket.emit('keyPress',{inputId:'down',state:true});
-		else if(event.keyCode === 65) //a
+		else if(event.keyCode === 65 || event.keyCode === 37) //a
 			socket.emit('keyPress',{inputId:'left',state:true});
-		else if(event.keyCode === 87) // w
+		else if(event.keyCode === 87 || event.keyCode === 38) // w
 			socket.emit('keyPress',{inputId:'up',state:true});		
 	}
 
 	document.onkeyup = function(event){
-		if(event.keyCode === 68)	//d
+		if(event.keyCode === 68 || event.keyCode === 39)	//d
 			socket.emit('keyPress',{inputId:'right',state:false});
-		else if(event.keyCode === 83)	//s
+		else if(event.keyCode === 83 || event.keyCode === 40)	//s
 			socket.emit('keyPress',{inputId:'down',state:false});
-		else if(event.keyCode === 65) //a
+		else if(event.keyCode === 65 || event.keyCode === 37) //a
 			socket.emit('keyPress',{inputId:'left',state:false});
-		else if(event.keyCode === 87) // w
+		else if(event.keyCode === 87 || event.keyCode === 38) // w
 			socket.emit('keyPress',{inputId:'up',state:false});
 	}
 
-	//PLAYER----------------------------------------------------
+	//PLAYER AND COLLISION WITH WALLS-------------------------------
 	function player(data){
 		for(var i = 0; i < data.length; i++){
 			ctx.drawImage(playerSprite, data[i].x, data[i].y,50,50);
-			collidedWall(data);
+			if(data[i].x >= canvasWidth+50)
+				socket.emit("rightWallCollision", {hitRightWall:true});
+			else if(data[i].x <= -50)
+				socket.emit("leftWallCollision", {hitLeftWall:true});
+			else if(data[i].y <= -50)
+				socket.emit("topWallCollision", {hitTopWall:true});
+			else if(data[i].y >= canvasHeight+50)
+				socket.emit("bottomWallCollision", {hitBottomWall:true});
+		}
+	}
+
+	//PLAYER NAME---------------------------------------------------
+	function playerName(data){
+		for(var i = 0; i < data.length; i ++){
+			ctx.font = "Helvetica";
+			ctx.fillText(data, data[i].x, data[i].y,50,50);
 		}
 	}
 	
-
-	function collidedWall(data){
-		for(var i = 0; i < data.length; i++){
-			if(data[i].x+50 >= canvasWidth){
-				console.log("collision right wall");
-				socket.emit('collidedWall',{inputId:'boom',state:true});
-			}
-		}
-	}
-
-	//BACKGROUND------------------------------------------------
+	//BACKGROUND----------------------------------------------------
 	function loadBackgroundImg(){
-		backgroundImgWidth = spaceBackground.width,
+		backgroundImgWidth = spaceBackground.width;
 		backgroundImgHeight = spaceBackground.height;
 		renderBackground();                
 	}
@@ -161,10 +180,9 @@
 			//console.log(scrollVal);
 			scrollVal = 0;
 		}
-
 		scrollVal+=speed;				
-		ctx.drawImage(spaceBackground,-scrollVal,0,backgroundImgWidth, backgroundImgHeight);
-     	ctx.drawImage(spaceBackground,canvasWidth-scrollVal,0,backgroundImgWidth, backgroundImgHeight);
+		ctx.drawImage(spaceBackground, -scrollVal, 0, backgroundImgWidth, backgroundImgHeight);
+     	ctx.drawImage(spaceBackground, canvasWidth-scrollVal, 0, backgroundImgWidth, backgroundImgHeight);
 	}
 
 </script>	

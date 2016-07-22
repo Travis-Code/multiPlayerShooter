@@ -12,28 +12,30 @@ body{
 }
 
 #chat-form{
-  	text-align: center;
-      display: hidden;
-
-
+	text-align: center;
+  display: none;
 }
 
-
+#signDiv-signIn{
+  margin: 5px;
+}
 
 #chat-text{
 	margin: 0 auto;
 	width:60%; 
-	height:200px; 
+	height:100px; 
 	border:1px solid #000000;
   font-family: Arial, Helvetica, sans-serif;
 	overflow-y:scroll;
 	color: orange;
+  display: none;
 }
 
 #chat-input{
-  	margin: 0 auto;
-  	margin-top: 5px;
-	width:60%;
+	margin: 0 auto;
+	margin-top: 5px;
+  width:60%;
+  display: none;
 }
 
 h1{
