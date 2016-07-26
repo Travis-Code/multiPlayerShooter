@@ -1,37 +1,84 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>game dev mmo</title>
+	<title>BOOMS ARCADE</title>
 	<link rel="stylesheet" type="text/css" href="/client/style.css">
+	<link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
+
+	 <meta property="og:title" content="BOOMS MULTIPLAYER/CHAT" /> 
+	 <meta property="og:image" content="http://i.imgur.com/FjodQsz.png" /> 
+	 <meta property="og:description" content="Space Ship Flying Game and Chat Prototype" /> 
+	 <meta property="og:url" content="https://evening-fjord-63370.herokuapp.com/">
+ 	
+	 <!-- no scaling of screen -->
+	<meta name="viewport" content="width=device-width,user-scalable=no">
+
 	<!-- Latest compiled and minified CSS -->
-	<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+	<!--  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 
-	<!-- Optional theme -->
-	<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous"> -->
-
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+ -->
 	<!-- Latest compiled and minified JavaScript -->
-	<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script> -->
+<!-- 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+ -->
+ <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
 </head>
-	<body>
+
+	<body style="background: #333;">
 		<div id="gameDiv" class="container">
-	 			<div id ="canvasContainer"><br>
-					<canvas id="ctx" width="640" height="380"></canvas>
+				<div class="hangout">MULTIPLAYER SPACE ARCADE
 				</div>
-				<div id="signDiv">
-					<input id="signDiv-username" placeholder="ENTER NICKNAME" type="text"></input><br>
-					<button type="button" id="signDiv-signIn" class="btn btn-lg btn-danger">SUBMIT</button><br>
+	 			<div id="canvasContainer">
+	 				<!-- TOUCH BUTTON CONTAINER -->
+		 			<div class="buttonContainer">
+			 			<div id="upButtonDiv">
+			 			<br><br><br><br><br>
+<!-- 							<button type="button" id="upButtonDiv-pressed" class="btn btn-primary btn-sm">UP</button><br><br>
+ -->	
+							<button id="upButtonDiv-pressed">UP</button><br><br>
+
+ 					</div>	
+
+						<div class="leftRightContainer">
+							<div id="leftRightButtonDiv">
+								<button type="button" id="leftButtonDiv-pressed" class="btn btn-primary btn-sm">LEFT</button>
+								<button type="button" id="rightButtonDiv-pressed" class="btn btn-primary btn-sm">RIGHT</button><br><br>
+							</div>	
+						</div>
+
+						<div id="downButtonDiv">
+							<button type="button" id="downButtonDiv-pressed" class="btn btn-primary btn-sm">DOWN</button><br>
+						</div>	
+					</div>
+
+					<canvas id="ctx" width="500px" height="350px"></canvas>
+
+					<div id ="chatContainer"><br><br>
+						<div id="signDiv"><br><br><br><br>
+							<input id="signDiv-username" placeholder="enter nickname" type="text"></input><br>
+							<button type="button" id="signDiv-signIn" class="btn btn-lg btn-danger">SUBMIT</button><br>
+						</div>
+
+						<div id="chat-text">WELCOME TO THE CHAT</div>
+						<form id="chat-form">
+							<input id="chat-input" "type=text" name="etext" placeholder="chat text"></input>
+						</form>
+					</div>
 				</div>
-				<div id="chat-text"></div>
-				<form id="chat-form">
-					<input id="chat-input" "type=text" name="etext" placeholder="chat text"></input>
-				</form>
-			</div>
 		</div>
+
 	</body>
+
 </html>
 
 
 <script src ="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script src ="client/touchControls.js"></script>
+<script src ="client/jquery.mobile.custom.min.js"></script>
+
+
 <script>
 
 	window.addEventListener("load", gamePlay, false);
@@ -55,7 +102,10 @@
 	var playerSprite = new Image();
 	var spaceBackground = new Image();
 	var scrollVal = 0;
-	var speed = 8;
+	var speed = 6;
+
+
+
 
 	//ASSETS------------------------------------------------
 	playerSprite.src = "/client/img/nightraiderfixed.png";
@@ -68,9 +118,9 @@
 			loadBackgroundImg();
 			player(data);
 		});
-	socket.on("nameOver", function(dataName){
-					playerName(dataName);
-				});
+		socket.on("nameOver", function(dataName){
+			playerName(dataName);
+		});
 
 	}
 
@@ -82,7 +132,8 @@
 	var chatInput = document.getElementById('chat-input');
 	var chatForm = document.getElementById('chat-form');
 
-	document.getElementById("signDiv-username").addEventListener("keyup", function(event) {
+
+	signDivUsername.addEventListener("keyup", function(event) {
 		event.preventDefault();
 	    if (event.keyCode == 13) {
 	        document.getElementById("signDiv-signIn").click();
@@ -91,7 +142,7 @@
 
 	signDivSignIn.onclick = function(){
 		socket.emit('signIn', signDivUsername.value)
-		document.getElementById('chat-input').focus;
+		chatInput.focus;
 	}
 
 	socket.on('signInResponse', function(data){
@@ -109,6 +160,7 @@
 	//CHAT--------------------------------------------------
 	socket.on('addToChat', function(data){
 		chatText.innerHTML += '<div>' + data + '</div>';
+		chatText.blur()
 	});
 	chatForm.onsubmit = function(e){
 		e.preventDefault();
@@ -133,6 +185,7 @@
 		else if(event.keyCode === 87 || event.keyCode === 38) // w
 			socket.emit('keyPress',{inputId:'up',state:true});		
 	}
+
 
 	document.onkeyup = function(event){
 		if(event.keyCode === 68 || event.keyCode === 39)	//d

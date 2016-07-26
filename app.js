@@ -12,8 +12,6 @@ serv.listen(process.env.PORT || 3000);
 	console.log("Server Started on port 3000");
 
 
-
-
 var SOCKET_LIST = {};
 var PLAYER_LIST = {};
 var Player_Names = {};
@@ -29,8 +27,8 @@ var Player = function(id){
 		x:250,
 		y:250,
 		id:id,
-		canvasWidth:640,
-		canvasHeight:380,
+		canvasWidth:500,
+		canvasHeight:350,
 		pressingRight:false,
 		pressingLeft:false,
 		pressingUp:false,
@@ -94,7 +92,6 @@ io.sockets.on('connection', function(socket){
 		delete Player_Names[player.username];
 	});
 
-
 //CHAT----------------------------------------------------------------
 	//sign in get nickname
 	socket.on('signIn', function(username){
@@ -105,7 +102,7 @@ io.sockets.on('connection', function(socket){
 		console.log(numberOfUsers + " users online atm");
 		addedUser = true;
 		Player_Names[player.username] = username;
-		console.log(" User " + player.username + " has signed in" );
+		console.log(" User " + player.username + " has signed in!" );
 		socket.emit('signInResponse', {success:true});
 	});
 
@@ -157,7 +154,6 @@ setInterval(function(){
 		});
 
 		socket.emit("newPosition",pack);
-		socket.emit("nameOver", namePack);
 	}
 
 },1000/25);
